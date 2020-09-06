@@ -1,0 +1,16 @@
+[package]
+name = "kettle"
+version = "0.1.0"
+authors = ["Philip Koperski <philip@pretzelwagon.com>"]
+description = "Boiler for platform-specific applications"
+repository = "https://github.com/asvln/kettle"
+documentation = "https://docs.rs/kettle/"
+keywords = ["app", "dirs", "xdg", "config", "ini"]
+readme = "README.md"
+license = "MIT"
+edition = "2018"
+
+[dependencies]
+thiserror = "1.0.20"
+dirs = "3.0.1"
+rust-ini = "0.15.3"
