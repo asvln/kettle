@@ -1,6 +1,6 @@
 [package]
 name = "kettle"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Philip Koperski <philip@pretzelwagon.com>"]
 description = "Boiler for platform-specific applications"
 repository = "https://github.com/asvln/kettle"

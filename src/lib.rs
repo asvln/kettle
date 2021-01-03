@@ -1,8 +1,6 @@
-//! `kettle` is a boiler for platform-specific applications
-//!
-//! It is a small library which provides simple cross-platform access to project specific `config`,
-//! `cache`, `data`, etc. directories for applications running on Linux/macOS/Windows. It also
-//! includes an `ini` based config file which can be easily used for application settings.
+//! `kettle` is a small library which provides simple cross-platform access to project specific
+//! `config`, `cache`, `data`, etc. directories for applications running on Linux/macOS/Windows.
+//! It also includes an `ini` based config file which can be easily used for application settings.
 //!
 //! This crate utilizes the [`dirs`](https://crates.io/crates/dirs) crate and re-exports it for
 //! easy access to non-application directories.
@@ -17,23 +15,23 @@
 //!     let config_dir = APP.config_dir();
 //!     let cache_dir = APP.cache_dir();
 //!     let data_dir = APP.data_dir();
-//!     
-//!     // Example output of `config_dir`
-//!     // Linux = /home/Alice/.config/app_name
-//!     // macOS = /Users/Alice/Library/Application Support/app_name
-//!     // Windows C:\Users\Alice\AppData\Roaming\app_name
 //!
 //!     APP.config_set("default_view", Some("vertical"));
+//!     APP.config_section_set("admin", "default_view", Some("horizontal"));
 //!     APP.config_set("key with spaces", None);
 //!
-//!     assert_eq!(APP.config_get("default_view"), Some("vertical"));
-//!     assert_eq!(APP.config_get("key with spaces") None,
+//!     let default_view = APP.config_get("default_view").unwrap();
+//!     let admin_view = APP.config_section_get("admin", "default_view").unwrap();
+//!     let spaces_key = APP.config_get("key with spaces").unwrap();
+//!
+//!     assert_eq!(default_view, Some("vertical".to_string()));
+//!     assert_eq!(admin_view, Some("horizontal".to_string()));
+//!     assert_eq!(spaces_key, None);
 //!
 //!     // Default config file name is 'config' and is saved in the respective config directory.
 //!     // Config file name can be changed during initialization.
 //!     // e.g. `Project::init("app_name", "settings.ini");
 //! }
-//! ```
 
 use error::*;
 use ini::Ini;
@@ -63,7 +61,7 @@ impl Project {
     /// // or...
     ///
     /// pub const fn app() {
-    ///     Project::init("app_name", Some("settings.ini")
+    ///     Project::init("app_name", Some("settings.ini"));
     /// }
     /// ```
     pub const fn init(project_name: &'static str, config_name: Option<&'static str>) -> Self {
@@ -158,10 +156,10 @@ impl Project {
         Ok(())
     }
 
-    fn set_or_delete(
+    fn set_or_delete<S: Into<String>>(
         &self,
         mut config: Ini,
-        section: Option<String>,
+        section: Option<S>,
         key: &'static str,
         value: Option<&'static str>,
     ) -> Result<Ini> {
@@ -183,9 +181,7 @@ impl Project {
     /// If value is set to `None`, then key field is deleted from the file.
     /// Returns `Err` if unable to write config file.
     pub fn config_set(&self, key: &'static str, value: Option<&'static str>) -> Result<()> {
-        // todo: make sections definable
         let section = None::<String>;
-
         if let Ok(config) = self.load() {
             let c = self.set_or_delete(config, section, key, value)?;
             self.save(c)?;
@@ -199,6 +195,34 @@ impl Project {
         }
     }
 
+    /// Set config key and value for a specific section. Creates config file if it does not exist.
+    /// ## Example
+    /// ```
+    /// APP.config_section_set("admin", "default-view", Some("vertical"))
+    /// APP.config_section_set("user.bob", "default-template", None)
+    /// ```
+    /// If value is set to `None`, then key field is deleted from the file.
+    /// If section is empty upon deletion, the section is deleted as well.
+    /// Returns `Err` if unable to write config file.
+    pub fn config_section_set<S: Into<String>>(
+        &self,
+        section: S,
+        key: &'static str,
+        value: Option<&'static str>,
+    ) -> Result<()> {
+        if let Ok(config) = self.load() {
+            let c = self.set_or_delete(config, Some(section), key, value)?;
+            self.save(c)?;
+            Ok(())
+        } else {
+            self.create()?;
+            let config = self.load()?;
+            let c = self.set_or_delete(config, Some(section), key, value)?;
+            self.save(c)?;
+            Ok(())
+        }
+    }
+
     /// Get config key's value and read it as a String.
     /// ## Example
     /// ```
@@ -207,11 +231,29 @@ impl Project {
     /// Returns `Ok(None)` if key does not exist or if field is blank.
     /// Returns `Err` if unable to read config file.
     pub fn config_get(&self, key: &str) -> Result<Option<String>> {
-        // todo: make sections definable
-        let section = None::<String>;
-
         let config = self.load()?;
+        let section = None::<String>;
         let value = config.get_from(section, key);
+        match value {
+            Some(v) => Ok(Some(v.to_string())),
+            None => Ok(None),
+        }
+    }
+
+    /// Get config key's value from a specific section and read it as a String.
+    /// ## Example
+    /// ```
+    /// APP.config_section_get("user.bob", "default-view");
+    /// ```
+    /// Returns `Ok(None)` if key does not exist or if field is blank.
+    /// Returns `Err` if unable to read config file.
+    pub fn config_section_get<S: Into<String>>(
+        &self,
+        section: S,
+        key: &str,
+    ) -> Result<Option<String>> {
+        let config = self.load()?;
+        let value = config.get_from(Some(section), key);
         match value {
             Some(v) => Ok(Some(v.to_string())),
             None => Ok(None),
