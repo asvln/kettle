@@ -1,8 +1,8 @@
 [package]
 name = "kettle"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Philip Koperski <philip@pretzelwagon.com>"]
-description = "Boiler for platform-specific applications"
+description = "`dirs` and config for platform-specific applications"
 repository = "https://github.com/asvln/kettle"
 documentation = "https://docs.rs/kettle/"
 keywords = ["app", "dirs", "xdg", "config", "ini"]
@@ -14,3 +14,4 @@ edition = "2018"
 thiserror = "1.0.20"
 dirs = "3.0.1"
 rust-ini = "0.15.3"
+paste = "1.0.5"

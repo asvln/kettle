@@ -4,38 +4,43 @@
 ![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-orange.svg)
 
 # kettle
-`kettle` is a small library which provides simple cross-platform access to project specific `config`, `cache`, `data`, etc. directories for applications running on Linux/macOS/Windows. It also includes an `ini` based config file which can be easily used for application settings.
+A library for building applications natively on Linux/Redox/macOS/Windows.
+It currently provides...
 
-This crate utilizes the [`dirs`](https://crates.io/crates/dirs) crate and re-exports it for easy access to non-application specific directories.
+- app-specific `dirs`
+- easy `ini` config files
+
+This crate utilizes the [`dirs`](https://crates.io/crates/dirs) crate and re-exports it for easy access.
 
 ## Usage
 ```rust
-use kettle::Project;
-
-pub const APP: Project = Project::init("app_name", None);
+kettle::app!("this_APP")
 
 fn main() {
-    let config_dir = APP.config_dir();
-    let cache_dir = APP.cache_dir();
-    let data_dir = APP.data_dir();
+    let config_dir = THIS_APP.config_dir(); //$HOME/.config/this_APP/
+    let data_dir = THIS_APP.data_dir();     //$HOME/.local/share/this_APP/
 
-    APP.config_set("default_view", Some("vertical"));
-    APP.config_section_set("admin", "default_view", Some("horizontal"));
-    APP.config_set("key with spaces", None);
+    // default config file
+    THIS_APP.config()
+        .set("view", Some("horizontal"));
 
-    let default_view = APP.config_get("default_view").unwrap();
-    let admin_view = APP.config_section_get("admin", "default_view").unwrap();
-    let spaces_key = APP.config_get("key with spaces").unwrap();
+    let view = THIS_APP.config()
+        .get("view");
 
-    assert_eq!(default_view, Some("vertical".to_string()));
-    assert_eq!(admin_view, Some("horizontal".to_string()));
-    assert_eq!(spaces_key, None);
+    assert_eq!(view.unwrap(), Some("horizontal".to_string()));
 
-    // Default config file name is 'config' and is saved in the respective config directory.
-    // Config file name can be changed during initialization.
-    // e.g. `Project::init("app_name", "settings.ini");
+    // named config file
+    THIS_APP.config_file("admin_profiles")
+        .section("dev") // setting `ini` sections is possible
+        .set("view", None);
+
+    let admin_view = THIS_APP.config_file("admin_profiles")
+        .section("dev");
+        .get("view");
+
+    assert_eq!(admin_view.unwrap(), None);
 }
 ```
 
 ## License
-Licensed under either of Apache License, Version 2.0 or MIT license at your option. 
+Licensed under either of Apache License, Version 2.0 or MIT license at your option.

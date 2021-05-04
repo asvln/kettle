@@ -9,7 +9,11 @@ pub enum KettleError {
     #[error(transparent)]
     IoError(#[from] std::io::Error),
 
-    /// Represents all `ini` Errors;
+    /// Represents all `ini` parsing Errors;
+    #[error(transparent)]
+    IniParseError(#[from] ini::ini::ParseError),
+
+    /// Represents all other `ini` Errors;
     #[error(transparent)]
     IniError(#[from] ini::ini::Error),
 }
