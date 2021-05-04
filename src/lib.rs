@@ -8,7 +8,7 @@
 //!
 //! # Usage
 //! ```
-//! kettle::app!("this_APP");
+//! pub(crate) const THIS_APP: kettle::App = kettle::app("this_APP", None);
 //!
 //! fn main() {
 //!     let config_dir = THIS_APP.config_dir(); //$HOME/.config/this_APP/
@@ -35,57 +35,10 @@
 //!     assert_eq!(admin_view, None);
 //! }
 //! ```
-
-pub mod app;
-mod config;
+//!
 pub mod dirs;
-mod error;
 
-#[doc(hidden)]
-pub mod __ {
-    pub use paste::paste;
-}
-/// Initializes a `kettle::app::App`.
-///
-/// Simple usage
-/// ```
-/// kettle::app!("this_APP");
-/// ```
-///
-/// Custom const
-/// ```
-/// kettle::app!("this_APP", THAT_APP);
-/// ```
-///
-/// Custom default config filename
-/// ```
-/// kettle::app!("this_APP" => "config.ini");
-/// ```
-///
-/// Fully custom
-/// ```
-/// kettle::app!("this_APP", THAT_APP => "config.ini");
-///```
-#[macro_export]
-macro_rules! app {
-    ($name:literal) => {
-        $crate::__::paste! {
-            pub const [<$name:upper>]: $crate::app::App = $crate::app::app($name, None);
-        }
-    };
-    ($name:literal, $const_name:expr) => {
-        $crate::__::paste! {
-            pub const [<$const_name:upper>]: $crate::app::App = $crate::app::app($name, None);
-        }
-    };
-    ($name:literal => $config_file:literal) => {
-        $crate::__::paste! {
-            pub const [<$name:upper>]: $crate::app::App = $crate::app::app($name, Some($config_file));
-        }
-    };
-    ($name:literal, $const_name:expr => $config_file:literal) => {
-        $crate::__::paste! {
-            pub const [<$const_name:upper>]: $crate::app::App = $crate::app::app($name, Some($config_file));
-        }
-    };
-}
+mod app;
+pub use app::{app, App};
+mod config;
+mod error;

@@ -38,6 +38,18 @@ impl App {
     gen_dirs! {"cache", "config", "data", "data_local", "preference"}
 }
 
+
+/// Initializes a `kettle::App`.
+///
+/// Defining this as a const with `pub(crate)` visibility will allow you to utilize `kettle`
+/// across your code.
+/// # Example
+/// ```
+/// pub(crate) const THIS_APP: kettle::App = kettle::app("this_APP", None)
+///
+/// // you can optionally define a custom default config filename
+/// pub(crate) const THIS_APP: kettle::App = kettle::app("this_APP", Some("config.ini")
+/// ```
 pub const fn app(name: &'static str, config_file: Option<&'static str>) -> App {
     App { name, config_file }
 }
