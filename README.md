@@ -14,7 +14,7 @@ This crate utilizes the [`dirs`](https://crates.io/crates/dirs) crate and re-exp
 
 ## Usage
 ```rust
-kettle::app!("this_APP")
+pub(crate) const THIS_APP: kettle::App = kettle::app("this_APP", None);
 
 fn main() {
     let config_dir = THIS_APP.config_dir(); //$HOME/.config/this_APP/
