@@ -1,19 +1,5 @@
-use paste::paste;
 use crate::{dirs, config::Config};
-
-#[doc(hidden)]
-macro_rules! gen_dirs {
-    ($($dir_name:expr),*) => {
-        $(
-            paste! {
-                #[doc = " PathBuf for App's `" $dir_name "` directory."]
-                pub fn [<$dir_name _dir>](&self) -> std::path::PathBuf {
-                    dirs::[<$dir_name _dir>]().join(&self.name)
-                }
-            }
-        )*
-    }
-}
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct App {
@@ -35,7 +21,51 @@ impl App {
         Config::from(dir, file)
     }
 
-    gen_dirs! {"cache", "config", "data", "data_local", "preference"}
+    /// PathBuf for your application's cache directory
+    /// ## Example
+    /// ```
+    /// let cache_dir = APP.cache_dir();
+    /// ```
+    pub fn cache_dir(&self) -> PathBuf {
+        dirs::cache_dir().join(&self.name)
+    }
+
+    /// PathBuf for your application's config directory
+    /// ## Example
+    /// ```
+    /// let config_dir = APP.config_dir();
+    /// ```
+    pub fn config_dir(&self) -> PathBuf {
+        dirs::config_dir().join(&self.name)
+    }
+
+    /// PathBuf for your application's data directory
+    /// ## Example
+    /// ```
+    /// let data_dir = APP.data_dir();
+    /// ```
+    pub fn data_dir(&self) -> PathBuf {
+        dirs::data_dir().join(&self.name)
+    }
+
+    /// PathBuf for your application's local data directory
+    /// ## Example
+    /// ```
+    /// let data_local_dir = APP.data_local_dir();
+    /// ```
+    pub fn data_local_dir(&self) -> PathBuf {
+        dirs::data_local_dir().join(&self.name)
+    }
+
+    /// PathBuf for your application's preference directory
+    /// ## Example
+    /// ```
+    /// let preference_dir = APP.preference_dir();
+    /// ```
+    pub fn preference_dir(&self) -> PathBuf {
+        dirs::preference_dir().join(&self.name)
+    }
+
 }
 
 
